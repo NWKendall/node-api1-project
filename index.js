@@ -17,19 +17,31 @@ server.get("/api/users", (req, res) => {
 
 // post requests
 server.post("/api/users", (req, res) => {
-  const dbInfo = req.body;
-  database.insert(dbInfo)
-    .then(db => {
-        // db.name  ?
-        //   res.status(400).json({ errorMessage: "Please provide name and bio for the user." }) : 
-          res.status(201).json(dbInfo);         
-    })
-    .catch(err => {
-      console.log(err)
-      res.status(500).json({ errorMessage: "There was an error while saving the user to the database." }); 
-    })
+  
+  const { name, bio } = req.body;
+  
+  if (!name || !bio) {
+    res.status(400).json({ errorMessage: "Please provide name and bio for the user." }) 
+  } else {
+      database.insert(req.body)
+      .then(({ id }) => {
+        database.findById(id)
+          .then(newUser => {
+            res.status(201).json(newUser)
+          })
+          .catch(err => {
+            console.log(err)
+            res.status(500).json({ errorMessage: "There was an error while saving the user to the database." });
+          })       
+      .catch(err => {
+        console.log(err)
+        res.status(500).json({ errorMessage: "There was an error while saving the user to the database." }); 
+      })
+   })
+  }
 })
 
+  
 
 // individual id requests (GET)
 server.get("/api/users/:id", (req, res) => {
@@ -63,8 +75,8 @@ server.delete("/api/users/:id", (req, res) => {
 
 // PUT requests
 server.put("/api/users/:id", (req, res) => {
-  const dbInfo = req.body;
-  database.update(req.params.id, dbInfo)
+  const updateUser = req.body;
+  database.update(req.params.id, updateUser)
     .then(edit => {
       ! edit ? res.status(404).json({ errorMessage: "The user with the specified ID does not exist." })  
       // : edit ? res.status(400).json({ errorMessage: "Please provide name and bio for the user." })       
