@@ -46,11 +46,13 @@ server.post("/api/users", (req, res) => {
 })
 
 
-// individual id requests
+// individual id requests (GET)
 server.get("/api/users/:id", (req, res) => {
   database.findById(req.params.id)
     .then(db => {
-      res.status(200).json(db)
+      !db ?
+        res.status(404).json({ errorMessage: "The user with the specified ID does not exist." }) :
+        res.status(200).json(db)
     })
     .catch(err => {
       console.log(err)
@@ -58,14 +60,13 @@ server.get("/api/users/:id", (req, res) => {
     })
 })
 
-
-
-
-
+// individual id requests (DELETE)
 server.delete("/api/users/:id", (req, res) => {
   database.remove(req.params.id)
     .then(removed => {
-      res.status(200).json(removed)
+      !removed ? 
+        res.status(404).json({ errorMessage: "The user with the specified ID does not exist."}) :
+        res.status(200).json(removed)
     })
     .catch(err => {
       console.log(err);
