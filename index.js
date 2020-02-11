@@ -1,22 +1,7 @@
-// implement your API here
-
-// 1 .declare express
 const express = require("express");
-
-// 2. declare server and port (with server lsiten)
 const server = express();
-
-// 3. assign path to database
 const database = require("./data/db.js")
-
-// 4. activate JSON parsing
 server.use(express.json());
-
-// 5. get all root objects (e.g. users)
-// need conditional 
-// server.get('/', (req, res) => {
-//   res.json({ test: 'WORKING!!!'})
-// })
 
 server.get("/api/users", (req, res) => {
   database.find()
@@ -32,12 +17,12 @@ server.get("/api/users", (req, res) => {
 
 // post requests
 server.post("/api/users", (req, res) => {
-  
   const dbInfo = req.body;
-
   database.insert(dbInfo)
     .then(db => {
-        res.status(201).json(db);
+        // db.name  ?
+        //   res.status(400).json({ errorMessage: "Please provide name and bio for the user." }) : 
+          res.status(201).json(dbInfo);         
     })
     .catch(err => {
       console.log(err)
@@ -73,6 +58,22 @@ server.delete("/api/users/:id", (req, res) => {
       res.status(500).json({ errorMessage: "The user could not be removed." })
     })
  
+})
+
+
+// PUT requests
+server.put("/api/users/:id", (req, res) => {
+  const dbInfo = req.body;
+  database.update(req.params.id, dbInfo)
+    .then(edit => {
+      ! edit ? res.status(404).json({ errorMessage: "The user with the specified ID does not exist." })  
+      // : edit ? res.status(400).json({ errorMessage: "Please provide name and bio for the user." })       
+      : res.status(200).json(edit);
+    })
+    .catch(err => {
+      console.log(err);
+      res.status(500).json({ errorMessage: "The user information could not be modified." })
+    })
 })
 
 const port = 5000;
